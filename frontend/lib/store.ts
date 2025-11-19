@@ -19,13 +19,69 @@ interface UIState {
   setTheme: (theme: 'light' | 'dark') => void;
 }
 
+interface Portfolio {
+  totalValue: number;
+  availableBalance: number;
+  usedBalance: number;
+  pnl24h: number;
+  pnlPercent: number;
+}
+
+interface Performance {
+  totalReturn: number;
+  dailyChange: number;
+  dailyPnL: number;
+  dailyPnLPercent: number;
+  riskLevel: 'low' | 'medium' | 'high';
+}
+
+interface ActivePosition {
+  id: string;
+  symbol: string;
+  side: 'long' | 'short';
+  amount: number;
+  entryPrice: number;
+  currentPrice: number;
+  pnl: number;
+  pnlPercent: number;
+}
+
+interface AIStrategy {
+  id: string;
+  name: string;
+  type: string;
+  status: 'active' | 'paused' | 'testing';
+  performance: {
+    totalReturn: number;
+    winRate: number;
+    accuracy: number;
+  };
+  isActive: boolean;
+}
+
 interface TradingState {
   selectedSymbol: string;
   selectedTimeframe: string;
   tradeMode: 'real' | 'demo';
+  portfolio: Portfolio | null;
+  performance: Performance | null;
+  activePositions: ActivePosition[];
+  aiStrategies: AIStrategy[];
+  marketData: Record<string, any>;
+  recentTransactions: any[];
+
   setSelectedSymbol: (symbol: string) => void;
   setSelectedTimeframe: (timeframe: string) => void;
   setTradeMode: (mode: 'real' | 'demo') => void;
+  updatePortfolio: (portfolio: Partial<Portfolio>) => void;
+  updatePerformance: (performance: Partial<Performance>) => void;
+  updateActivePosition: (position: ActivePosition) => void;
+  addAIStrategy: (strategy: AIStrategy) => void;
+  updateStrategy: (id: string, updates: Partial<AIStrategy>) => void;
+  addAISignal: (signal: any) => void;
+  addTransaction: (transaction: any) => void;
+  refreshData: () => void;
+  placeOrder: (order: any) => Promise<void>;
 }
 
 interface NotificationState {
