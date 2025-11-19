@@ -3,20 +3,83 @@ export interface User {
   email: string;
   firstName?: string;
   lastName?: string;
+  accountType: 'demo' | 'real' | 'enterprise';
+  avatar?: string;
   phone?: string;
-  avatarUrl?: string;
-  accountType: 'standard' | 'premium' | 'enterprise' | 'demo';
-  isVerified: boolean;
-  twoFactorEnabled: boolean;
+  country?: string;
+  isEmailVerified: boolean;
+  isTwoFactorEnabled: boolean;
+  preferences: UserPreferences;
+  subscription: Subscription;
   createdAt: string;
-  lastLogin?: string;
-  kycStatus?: 'not_started' | 'pending' | 'verified' | 'rejected';
+  updatedAt: string;
+  lastLoginAt?: string;
+}
+
+export interface UserPreferences {
+  language: string;
+  timezone: string;
+  currency: string;
+  notifications: NotificationPreferences;
+  trading: TradingPreferences;
+  ui: UIPreferences;
+}
+
+export interface NotificationPreferences {
+  email: boolean;
+  push: boolean;
+  tradeAlerts: boolean;
+  priceAlerts: boolean;
+  strategyAlerts: boolean;
+  riskAlerts: boolean;
+  marketingEmails: boolean;
+}
+
+export interface TradingPreferences {
+  defaultOrderType: 'market' | 'limit' | 'stop';
+  defaultTimeframe: string;
+  showChartOnMobile: boolean;
+  confirmOrders: boolean;
+  autoRefresh: boolean;
+  darkMode: boolean;
+}
+
+export interface UIPreferences {
+  sidebarCollapsed: boolean;
+  chartType: 'candlestick' | 'line' | 'area';
+  theme: 'light' | 'dark' | 'auto';
+  density: 'compact' | 'normal' | 'comfortable';
+}
+
+export interface Subscription {
+  plan: 'free' | 'basic' | 'premium' | 'enterprise';
+  status: 'active' | 'inactive' | 'cancelled' | 'expired';
+  startDate?: string;
+  endDate?: string;
+  features: string[];
+  limits: SubscriptionLimits;
+}
+
+export interface SubscriptionLimits {
+  maxActiveStrategies: number;
+  maxApiCallsPerDay: number;
+  maxHistoricalDataDays: number;
+  realTimeData: boolean;
+  advancedFeatures: boolean;
+  prioritySupport: boolean;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  tokenType: string;
 }
 
 export interface LoginCredentials {
   email: string;
   password: string;
-  twoFactorCode?: string;
+  rememberMe?: boolean;
 }
 
 export interface RegisterData {
@@ -24,33 +87,28 @@ export interface RegisterData {
   password: string;
   firstName?: string;
   lastName?: string;
-  phone?: string;
-  accountType?: 'standard' | 'premium' | 'enterprise';
-  agreeToTerms: boolean;
+  accountType: 'demo' | 'real';
+  acceptTerms: boolean;
+  marketingConsent?: boolean;
 }
 
-export interface AuthResponse {
-  user: User;
-  accessToken: string;
-  refreshToken: string;
+export interface ResetPasswordRequest {
+  email: string;
 }
 
-export interface Wallet {
-  id: string;
-  type: 'trading' | 'funding';
-  currency: string;
-  balance: number;
-  availableBalance: number;
-  frozenBalance: number;
+export interface UpdatePasswordRequest {
+  currentPassword?: string;
+  newPassword: string;
+  token?: string;
 }
 
-export interface Transaction {
-  id: string;
-  type: 'deposit' | 'withdrawal' | 'trade' | 'transfer' | 'commission';
-  amount: number;
-  currency: string;
-  status: 'pending' | 'completed' | 'failed';
-  description: string;
-  createdAt: string;
-  completedAt?: string;
+export interface TwoFactorSetup {
+  secret: string;
+  qrCode: string;
+  backupCodes: string[];
+}
+
+export interface TwoFactorVerify {
+  token: string;
+  backupCode?: string;
 }
