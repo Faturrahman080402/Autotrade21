@@ -159,17 +159,125 @@ export const useUIStore = create<UIState>()(
 
 export const useTradingStore = create<TradingState>()(
   persist(
-    (set) => ({
-      selectedSymbol: 'BTCUSDT',
+    (set, get) => ({
+      selectedSymbol: 'BTC/USDT',
       selectedTimeframe: '1h',
       tradeMode: 'demo',
+      portfolio: null,
+      performance: null,
+      activePositions: [],
+      aiStrategies: [],
+      marketData: {},
+      recentTransactions: [],
+
       setSelectedSymbol: (selectedSymbol) => set({ selectedSymbol }),
       setSelectedTimeframe: (selectedTimeframe) => set({ selectedTimeframe }),
       setTradeMode: (tradeMode) => set({ tradeMode }),
+
+      updatePortfolio: (portfolio) => {
+        set((state) => ({
+          portfolio: state.portfolio ? { ...state.portfolio, ...portfolio } : portfolio as Portfolio
+        }));
+      },
+
+      updatePerformance: (performance) => {
+        set((state) => ({
+          performance: state.performance ? { ...state.performance, ...performance } : performance as Performance
+        }));
+      },
+
+      updateActivePosition: (position) => {
+        set((state) => {
+          const existingIndex = state.activePositions.findIndex(p => p.id === position.id);
+          if (existingIndex >= 0) {
+            const updated = [...state.activePositions];
+            updated[existingIndex] = position;
+            return { activePositions: updated };
+          } else {
+            return { activePositions: [...state.activePositions, position] };
+          }
+        });
+      },
+
+      addAIStrategy: (strategy) => {
+        set((state) => ({
+          aiStrategies: [...state.aiStrategies, strategy]
+        }));
+      },
+
+      updateStrategy: (id, updates) => {
+        set((state) => ({
+          aiStrategies: state.aiStrategies.map(strategy =>
+            strategy.id === id ? { ...strategy, ...updates } : strategy
+          )
+        }));
+      },
+
+      addAISignal: (signal) => {
+        console.log('AI Signal received:', signal);
+        // Handle AI signals
+      },
+
+      addTransaction: (transaction) => {
+        set((state) => ({
+          recentTransactions: [transaction, ...state.recentTransactions].slice(0, 50)
+        }));
+      },
+
+      refreshData: async () => {
+        // Fetch fresh data from API
+        try {
+          // Mock data for now
+          set((state) => ({
+            portfolio: {
+              totalValue: 100000,
+              availableBalance: 25000,
+              usedBalance: 75000,
+              pnl24h: 1250,
+              pnlPercent: 1.25
+            },
+            performance: {
+              totalReturn: 23.5,
+              dailyChange: 1.25,
+              dailyPnL: 1250,
+              dailyPnLPercent: 1.25,
+              riskLevel: 'medium'
+            }
+          }));
+        } catch (error) {
+          console.error('Failed to refresh data:', error);
+        }
+      },
+
+      placeOrder: async (order) => {
+        try {
+          // Place order via API
+          console.log('Placing order:', order);
+          // Add to recent transactions
+          get().addTransaction({
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            type: order.side,
+            symbol: order.symbol,
+            amount: order.amount,
+            price: order.price,
+            total: order.amount * (order.price || 0),
+            status: 'completed'
+          });
+        } catch (error) {
+          console.error('Failed to place order:', error);
+          throw error;
+        }
+      },
     }),
     {
       name: 'trading-storage',
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        selectedSymbol: state.selectedSymbol,
+        selectedTimeframe: state.selectedTimeframe,
+        tradeMode: state.tradeMode
+      })
     }
   )
 );
